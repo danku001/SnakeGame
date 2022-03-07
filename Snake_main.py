@@ -91,8 +91,7 @@ def game_loop():
             #keep snake same length unless fed
             #Remove last segment of snake
             snake.pop(0)    #removing the 0th element of snake
-        else:
-            #increment length
+
 
         #Draw snake
         for segment in snake:
