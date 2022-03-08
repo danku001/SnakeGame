@@ -9,8 +9,8 @@ import random
 #Define Program Constants
 WIDTH = 500
 HEIGHT = 500
-DELAY = 400 # Milliseconds
-FOOD_SIZE = 20
+DELAY = 100 # Milliseconds
+FOOD_SIZE = 10
 
 offsets = {
     'up':(0,20),
@@ -19,10 +19,49 @@ offsets = {
     'right':(20,0),
     }
 
+def bind_dir_keys():
+    screen.onkey(lambda: set_snake_dir('up'),'Up')
+    screen.onkey(lambda: set_snake_dir('down'),'Down')
+    screen.onkey(lambda: set_snake_dir('right'),'Right')
+    screen.onkey(lambda: set_snake_dir('left'),'Left')
+
+def set_snake_dir(direction):
+    global snake_direction
+
+    if direction == 'up':
+        if snake_direction != 'down':
+            snake_direction = 'up'
+
+    elif direction == 'down':
+        if snake_direction != 'up':
+            snake_direction = 'down'
+
+    elif direction == 'right':
+        if snake_direction != 'left':
+            snake_direction = 'right'
+
+    elif direction == 'left':
+        if snake_direction != 'right':
+            snake_direction = 'left'
+
+
+def reset():
+    """UPon exit, initialize game"""
+    global score, snake, snake_direction, food_pos
+
+    score = 0
+    snake = [[0,0],[20,0],[40,0],[60,0]]
+    snake_direction = 'up'
+    food_pos = get_random_food_pos()
+    food.goto(food_pos)
+    game_loop()
+
 def food_col():
     """placing the food and having snake eat food"""
-    global food_pos
-    if get_dist(snake[-1], food_pos) < 10:
+    global food_pos, score
+    
+    if get_dist(snake[-1], food_pos) < 20:
+        score += 1
         food_pos = get_random_food_pos()
         food.goto(food_pos)
         return True
@@ -45,30 +84,6 @@ def get_dist(pos1,pos2):
     return dist
 
 
-def go_up():
-    """key binding for up"""
-    global snake_direction
-    if snake_direction != 'down':
-        snake_direction = 'up'
-
-def go_right():
-    """key binding for right"""
-    global snake_direction
-    if snake_direction != 'left':
-        snake_direction = 'right'
-
-def go_down():
-    """key binding for down"""
-    global snake_direction
-    if snake_direction != 'up':
-        snake_direction = 'down'
-
-def go_left():
-    """key binding for left"""
-    global snake_direction
-    if snake_direction != 'right':
-        snake_direction = 'left'
-
 def game_loop():
     """game loop and logic"""
     stamper.clearstamps() #clears screen, gets rid of all stamps
@@ -81,7 +96,7 @@ def game_loop():
     if (new_head in snake) or (new_head[0] < - WIDTH/2) or (new_head[0] > WIDTH/2) \
        or (new_head[1] < - HEIGHT/2) or (new_head[1] > HEIGHT/2):
 
-        turtle.bye()
+        reset()
 
     else: 
         #Add new head to snake body.
@@ -99,6 +114,8 @@ def game_loop():
             stamper.stamp()
 
         #refresh screen
+        #add name
+        screen.title(f"Snake vers.1. Score: {score}")
         screen.update()
 
         #rinse and repeat
@@ -112,27 +129,25 @@ def game_loop():
 #Create a screen or window where the drawing will be done
 screen = turtle.Screen()
 screen.setup(WIDTH,HEIGHT)  # Set the dimensions of the Turtle Graphics window
-screen.title("Snake vers.1")# Name the sub window that pops up
-screen.bgcolor("pink")      # Changes the background color to pink
+screen.bgcolor("yellow")      # Changes the background color to pink
 screen.tracer(False)         # Turns off automatic automation
 
 # Event Handlers
 screen.listen() # listening for events
 # keys to listen for
-screen.onkey(go_up,'Up')
-screen.onkey(go_right,'Right')
-screen.onkey(go_down, 'Down')
-screen.onkey(go_left,'Left')
+bind_dir_keys()
 
 #Create a turtle object to do your bidding
 stamper = turtle.Turtle()
-stamper.shape('square')
+stamper.shape('circle')
+stamper.color('black')
 stamper.penup()             # Will not draw on screen as turtle moves
 
 #create a snake as a list of lists.
 snake = [[0,0],[20,0],[40,0],[60,0]]
 # Default snake direction
 snake_direction = 'up'
+score = 0
 
 #Draw snake
 for segment in snake:
@@ -141,7 +156,7 @@ for segment in snake:
 
 # Food
 food = turtle.Turtle()
-food.shape('circle')
+food.shape('triangle')
 food.color('blue')
 food.shapesize(FOOD_SIZE/20)
 food.penup()
@@ -149,7 +164,7 @@ food_pos = get_random_food_pos()
 food.goto(food_pos)
 
 #set animation in motion
-game_loop()
+reset()
 
 
 #necesary in order for close to work
